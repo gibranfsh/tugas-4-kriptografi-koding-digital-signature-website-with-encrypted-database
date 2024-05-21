@@ -8,7 +8,7 @@ export default function Navbar() {
           <a href="/">Database</a>
         </li>
         <li>
-          <a>Input</a>
+          <a href="/input">Input</a>
         </li>
       </ul>
     </nav>
