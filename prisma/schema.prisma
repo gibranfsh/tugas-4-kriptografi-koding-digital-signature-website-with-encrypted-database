@@ -1,67 +1,67 @@
 datasource db {
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
-    provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
 }
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 enum INDEKS {
-    A
-    AB
-    B
-    BC
-    C
-    D
-    E
+  A
+  AB
+  B
+  BC
+  C
+  D
+  E
 }
 
 model Mahasiswa {
-    nim          String @id @unique
-    nama         String
-    jumlah_sks   Int    @default(0)
-    ipk          Float  @default(0)
-    tanda_tangan String @default("")
+  nim          String @id @unique
+  nama         String
+  jumlah_sks   String
+  ipk          String
+  tanda_tangan String @default("")
 
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-    Nilai Nilai[]
+  Nilai Nilai[]
 }
 
 model Nilai {
-    id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    nilai INDEKS @default(A)
+  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nilai INDEKS @default(A)
 
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-    mahasiswa Mahasiswa @relation(fields: [nim], references: [nim])
-    nim       String
+  mahasiswa Mahasiswa @relation(fields: [nim], references: [nim])
+  nim       String
 
-    kode_mata_kuliah String
-    MataKuliah       MataKuliah @relation(fields: [kode_mata_kuliah], references: [kode_mata_kuliah])
+  kode_mata_kuliah String
+  MataKuliah       MataKuliah @relation(fields: [kode_mata_kuliah], references: [kode_mata_kuliah])
 }
 
 model MataKuliah {
-    kode_mata_kuliah String @id @unique
-    nama_mata_kuliah String
-    sks              Int
+  kode_mata_kuliah String @id @unique
+  nama_mata_kuliah String
+  sks              String
 
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-    Nilai Nilai[]
+  Nilai Nilai[]
 }
 
 model KetuaProgramStudi {
-    id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    nama        String
-    public_key  String
-    private_key String
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama        String
+  public_key  String
+  private_key String
 
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
