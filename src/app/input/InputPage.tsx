@@ -4,8 +4,15 @@ import { useState } from "react";
 import MahasiswaForm from "./component/MahasiswaForm";
 import NilaiForm from "./component/NilaiForm";
 import MatkulForm from "./component/MatkulForm";
+import { Mahasiswa, MataKuliah } from "@prisma/client";
 
-export default function InputPage() {
+export default function InputPage({
+  mahasiswa,
+  mataKuliah,
+}: {
+  mahasiswa: Mahasiswa[];
+  mataKuliah: MataKuliah[];
+}) {
   const [type, setType] = useState("Mahasiswa");
   return (
     <div className="px-[5%] py-20 flex flex-col gap-12">
@@ -26,7 +33,7 @@ export default function InputPage() {
       {type == "Mahasiswa" ? (
         <MahasiswaForm />
       ) : type == "Nilai" ? (
-        <NilaiForm />
+        <NilaiForm mahasiswa={mahasiswa} mataKuliah={mataKuliah}/>
       ) : (
         <MatkulForm />
       )}

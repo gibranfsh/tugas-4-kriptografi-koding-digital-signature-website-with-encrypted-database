@@ -10,21 +10,24 @@ export default function MatkulForm() {
   const [sks, setSks] = useState(0);
 
   const handleSubmit = async () => {
-    const res = await fetch("/api/v1/mata-kuliah", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        kode_mata_kuliah: rc4ModifiedEncrypt(kodematkul, "bekasi"),
-        nama_mata_kuliah: rc4ModifiedEncrypt(nama, "bekasi"),
-        sks: rc4ModifiedEncrypt(sks.toString(), "bekasi"),
-      }),
-    });
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mata-kuliah",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          kode_mata_kuliah: rc4ModifiedEncrypt(kodematkul, "bekasi"),
+          nama_mata_kuliah: rc4ModifiedEncrypt(nama, "bekasi"),
+          sks: rc4ModifiedEncrypt(sks.toString(), "bekasi"),
+        }),
+      }
+    );
 
     if (res.ok) {
       toast.success("Data mata kuliah berhasil disimpan");
-      
+
       setKodematkul("");
       setNama("");
       setSks(0);

@@ -21,17 +21,20 @@ export default function MahasiswaForm() {
       key.privateKey.n
     );
 
-    const res = await fetch("/api/v1/mahasiswa", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nim: nimencrypted,
-        nama: namaencrypted,
-        tanda_tangan: tandatanganencrypted,
-      }),
-    });
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mahasiswa",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nim: nimencrypted,
+          nama: namaencrypted,
+          tanda_tangan: tandatanganencrypted,
+        }),
+      }
+    );
 
     if (res.ok) {
       toast.success("Data mahasiswa berhasil disimpan");

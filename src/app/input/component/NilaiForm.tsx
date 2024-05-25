@@ -1,28 +1,39 @@
 "use client";
 
+import { rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
+import { Mahasiswa, MataKuliah } from "@prisma/client";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-export default function NilaiForm() {
+export default function NilaiForm({
+  mahasiswa,
+  mataKuliah,
+}: {
+  mahasiswa: Mahasiswa[];
+  mataKuliah: MataKuliah[];
+}) {
   const [kodematkul, setKodematkul] = useState("");
   const [nim, setNim] = useState("");
   const [nilai, setNilai] = useState("");
 
   const handleSubmit = async () => {
-    const res = await fetch(`/api/v1/nilai/${nim}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        kode_mata_kuliah: kodematkul,
-        nilai,
-      }),
-    });
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_WEB_URL + `/api/v1/nilai/${nim}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          kode_mata_kuliah: kodematkul,
+          nilai,
+        }),
+      }
+    );
 
     if (res.ok) {
       toast.success("Data nilai berhasil disimpan");
-      
+
       setKodematkul("");
       setNim("");
       setNilai("");
@@ -38,22 +49,30 @@ export default function NilaiForm() {
         <div className="w-1/2 flex flex-col gap-4">
           <div className="flex flex-col gap-4">
             <label className="font-semibold">Kode Mata Kuliah</label>
-            <input
-              type="text"
-              className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={kodematkul}
+            <select
+              className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setKodematkul(e.target.value)}
-            />
+            >
+              {mataKuliah.map((matkul) => (
+                <option key={matkul.kode_mata_kuliah}>
+                  {rc4ModifiedDecrypt(matkul.kode_mata_kuliah, "bekasi")}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-4">
             <label className="font-semibold">NIM</label>
-            <input
-              type="text"
-              className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={nim}
+            <select
+              className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setNim(e.target.value)}
-            />
+            >
+              {mahasiswa.map((mhs) => (
+                <option key={mhs.nim}>
+                  {rc4ModifiedDecrypt(mhs.nim, "bekasi")}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-4">
