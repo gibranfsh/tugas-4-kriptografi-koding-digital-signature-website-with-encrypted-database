@@ -150,6 +150,8 @@ export default function Landing({
           nim: rc4ModifiedEncrypt(mahasiswa.nim, "bekasi"),
           nama: rc4ModifiedEncrypt(mahasiswa.nama, "bekasi"),
           tanda_tangan: rc4ModifiedEncrypt(mahasiswa.tanda_tangan, "bekasi"),
+          jumlah_sks: rc4ModifiedEncrypt(mahasiswa.jumlah_sks ?? "0", "bekasi"),
+          ipk: rc4ModifiedEncrypt(mahasiswa.ipk ?? "0", "bekasi"),
           Nilai: mahasiswa.Nilai.map((nilai) => {
             return {
               ...nilai,
