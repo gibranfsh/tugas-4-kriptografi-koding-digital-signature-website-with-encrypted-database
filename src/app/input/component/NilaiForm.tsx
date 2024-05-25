@@ -6,13 +6,13 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 enum INDEKS {
-  "A",
-  "AB",
-  "B",
-  "BC",
-  "C",
-  "D",
-  "E",
+  "A" = "A",
+  "AB" = "AB",
+  "B" = "B",
+  "BC" = "BC",
+  "C" = "C",
+  "D" = "D",
+  "E" = "E",
 }
 
 export default function NilaiForm({
@@ -51,7 +51,8 @@ export default function NilaiForm({
       toast.success("Data nilai berhasil disimpan");
     } else
       toast.error(
-        data.error ?? "Data nilai gagal disimpan, silahkan coba lagi atau hubungi admin"
+        data.error ??
+          "Data nilai gagal disimpan, silahkan coba lagi atau hubungi admin"
       );
   };
 
@@ -91,10 +92,10 @@ export default function NilaiForm({
             <label className="font-semibold">Nilai</label>
             <select
               className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
-              onChange={(e) => setNilai(e.target.value)}
+              onChange={(e) => setNilai(e.target.value as INDEKS)}
             >
-              {Object.values(INDEKS).map((indeks) => (
-                <option key={indeks}>{indeks}</option>
+              {Object.values(INDEKS).map((nilai) => (
+                <option key={nilai}>{nilai}</option>
               ))}
             </select>
           </div>
