@@ -11,13 +11,14 @@ export async function POST(
   const data = await req.json();
 
   const { nimMahasiswa } = params;
+  console.log("nimMahasiswa:", nimMahasiswa)
 
   const mahasiswa = await prisma.mahasiswa.findUnique({
     where: {
       nim: rc4ModifiedEncrypt(nimMahasiswa, "bekasi") as string,
     },
   });
-  
+
   if (!mahasiswa) {
     return NextResponse.json({ error: "Mahasiswa not found" }, { status: 404 });
   }
@@ -28,6 +29,7 @@ export async function POST(
       kode_mata_kuliah: rc4ModifiedEncrypt(kode_mata_kuliah, "bekasi") as string,
     },
   });
+
   if (!mataKuliah) {
     return NextResponse.json(
       { error: "Mata kuliah not found" },
@@ -38,9 +40,9 @@ export async function POST(
   try {
     const newNilai = await prisma.nilai.create({
       data: {
-        nilai,
-        nim: nimMahasiswa,
-        kode_mata_kuliah,
+        nilai: rc4ModifiedEncrypt(nilai, "bekasi") as string,
+        nim: rc4ModifiedEncrypt(nimMahasiswa, "bekasi") as string,
+        kode_mata_kuliah: rc4ModifiedEncrypt(kode_mata_kuliah, "bekasi") as string,
       },
     });
 

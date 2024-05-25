@@ -12,9 +12,13 @@ export default function NilaiForm({
   mahasiswa: Mahasiswa[];
   mataKuliah: MataKuliah[];
 }) {
-  const [kodematkul, setKodematkul] = useState("");
-  const [nim, setNim] = useState("");
-  const [nilai, setNilai] = useState("");
+  const [kodematkul, setKodematkul] = useState(
+    rc4ModifiedDecrypt(mataKuliah[0].kode_mata_kuliah, "bekasi")
+  );
+  const [nim, setNim] = useState(
+    rc4ModifiedDecrypt(mahasiswa[0].nim, "bekasi")
+  );
+  const [nilai, setNilai] = useState(Object.values(INDEKS)[0]);
 
   const handleSubmit = async () => {
     const res = await fetch(

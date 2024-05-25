@@ -33,7 +33,7 @@ model Mahasiswa {
 
 model Nilai {
     id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    nilai INDEKS @default(A)
+    nilai String
 
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
