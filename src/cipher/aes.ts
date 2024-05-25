@@ -1,6 +1,14 @@
-import fs from 'fs';
-import { TextEncoder, TextDecoder } from 'util';
-import { subtle, getRandomValues } from 'crypto';
+import fs from "fs";
+import { subtle, getRandomValues } from "crypto";
+
+const TextEncodingPolyfill = require("text-encoding");
+Object.assign(global, {
+  TextEncoder: TextEncodingPolyfill.TextEncoder,
+  TextDecoder: TextEncodingPolyfill.TextDecoder,
+});
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
 // Convert string to Uint8Array
 function convertStringToUint8Array(str: string): Uint8Array {
@@ -10,18 +18,15 @@ function convertStringToUint8Array(str: string): Uint8Array {
 
 // Import key for AES encryption
 async function importKey(rawKey: Uint8Array): Promise<CryptoKey> {
-  return subtle.importKey(
-    'raw',
-    rawKey,
-    { name: 'AES-CBC' },
-    false,
-    ['encrypt', 'decrypt']
-  );
+  return crypto.subtle.importKey("raw", rawKey, { name: "AES-CBC" }, false, [
+    "encrypt",
+    "decrypt",
+  ]);
 }
 
 // Generate initialization vector (IV)
 function generateIV(): Uint8Array {
-  return getRandomValues(new Uint8Array(16));
+  return crypto.getRandomValues(new Uint8Array(16));
 }
 
 // Encrypt message
@@ -30,11 +35,11 @@ async function encryptMessage(
   keyString: string,
   iv: Uint8Array
 ): Promise<Uint8Array> {
-  const keyData = convertStringToUint8Array(keyString.padEnd(16, '0'));
+  const keyData = convertStringToUint8Array(keyString.padEnd(16, "0"));
   const key = await importKey(keyData);
-  const encrypted = await subtle.encrypt(
+  const encrypted = await crypto.subtle.encrypt(
     {
-      name: 'AES-CBC',
+      name: "AES-CBC",
       iv: iv,
     },
     key,
@@ -49,11 +54,11 @@ async function decryptMessage(
   keyString: string,
   iv: Uint8Array
 ): Promise<Uint8Array> {
-  const keyData = convertStringToUint8Array(keyString.padEnd(16, '0'));
+  const keyData = convertStringToUint8Array(keyString.padEnd(16, "0"));
   const key = await importKey(keyData);
-  const decrypted = await subtle.decrypt(
+  const decrypted = await crypto.subtle.decrypt(
     {
-      name: 'AES-CBC',
+      name: "AES-CBC",
       iv: iv,
     },
     key,
@@ -63,24 +68,38 @@ async function decryptMessage(
 }
 
 // Usage example with text
-const keyString = "this_is_ken";
-const iv = generateIV();
-const message = new TextEncoder().encode("Nama Saya Ken Azizan 1 2 3");
+// const keyString = "this_is_ken";
+// const iv = generateIV();
+// const message = new TextEncoder().encode("Nama Saya Ken Azizan 1 2 3");
 
-console.log('Original message:', new TextDecoder().decode(message));
+// console.log("Original message:", new TextDecoder().decode(message));
 
-encryptMessage(message, keyString, iv)
-  .then(encryptedMessage => {
-    console.log('Encrypted message (Base64):', Buffer.from(encryptedMessage).toString('base64'));
+// encryptMessage(message, keyString, iv)
+//   .then((encryptedMessage) => {
+//     console.log(
+//       "Encrypted message (Base64):",
+//       Buffer.from(encryptedMessage).toString("base64")
+//     );
 
-    return decryptMessage(encryptedMessage, keyString, iv);
-  })
-  .then(decryptedMessage => {
-    console.log('Decrypted message:', new TextDecoder().decode(decryptedMessage));
-  })
-  .catch(err => {
-    console.error('Error:', err);
-  });
+//     return decryptMessage(encryptedMessage, keyString, iv);
+//   })
+//   .then((decryptedMessage) => {
+//     console.log(
+//       "Decrypted message:",
+//       new TextDecoder().decode(decryptedMessage)
+//     );
+//   })
+//   .catch((err) => {
+//     console.error("Error:", err);
+//   });
+
+export {
+  encryptMessage,
+  decryptMessage,
+  generateIV,
+  convertStringToUint8Array,
+  importKey,
+};
 
 // Usage example with file
 // fs.readFile('mandiri.png', (err, data) => {

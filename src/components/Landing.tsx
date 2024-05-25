@@ -7,6 +7,8 @@ import { decryptRSA, encryptRSA, generateKeyRSA } from "@/cipher/rsa";
 import { keccakHash } from "@/cipher/sha3";
 import toast from "react-hot-toast";
 import { generateTranscript } from "@/app/utils/generateTranscript";
+import { encrypt } from "js-crypto-aes";
+import { encryptMessage, generateIV } from "@/cipher/aes";
 
 interface MahasiswaProps extends Mahasiswa {
   Nilai: {
@@ -276,10 +278,10 @@ export default function Landing({
     }
   }
 
-  const handleDownload = async (mahasiswa: MahasiswaProps) => {
+  const handleDownload = async (mahasiswa: any) => {
     const loadingToast = toast.loading("Submitting data...");
 
-    const nilaiMahasiswaDecrypted = mahasiswa.Nilai.map((nilai) => {
+    const nilaiMahasiswaDecrypted = mahasiswa.Nilai.map((nilai: any) => {
       return {
         ...nilai,
         MataKuliah: {
@@ -296,8 +298,7 @@ export default function Landing({
         },
         nilai: rc4ModifiedDecrypt(nilai.nilai, "bekasi"),
       };
-    }
-    );
+    });
 
     const mahasiswaDecrypted = {
       nim: rc4ModifiedDecrypt(mahasiswa.nim, "bekasi"),
@@ -309,17 +310,33 @@ export default function Landing({
     };
 
     console.log("mahasiswaDecrypted", mahasiswaDecrypted);
+
     try {
-      const pdfBytes = await generateTranscript(mahasiswaDecrypted, "I Gusti Bagus Baskara Nugraha, S.T., M.T., Ph.D.");
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const pdfBytes = await generateTranscript(
+        mahasiswaDecrypted,
+        "I Gusti Bagus Baskara Nugraha, S.T., M.T., Ph.D."
+      );
+
+      const keyString = "bekasi";
+      const iv = generateIV();
+      const encryptedPdfBytes = await encryptMessage(
+        new Uint8Array(pdfBytes),
+        keyString,
+        iv
+      );
+
+      const blob = new Blob([iv, encryptedPdfBytes], {
+        type: "application/pdf",
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${mahasiswaDecrypted.nim}_transcript.pdf`;
+      link.download = `${mahasiswaDecrypted.nim}_transcript_encrypted.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+
       toast.success("Transcript downloaded successfully", { id: loadingToast });
     } catch (error) {
       toast.error("Failed to download transcript", { id: loadingToast });
@@ -343,7 +360,7 @@ export default function Landing({
               checked={isEncrypted}
             />
             <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+            <span className="ms-3 text-sm font-medium text-gray-900">
               Encrypt Data
             </span>
           </label>
