@@ -1,4 +1,5 @@
 import InputPage from "./InputPage";
+import { prisma } from "@/app/lib/prisma";
 
 export default async function Page() {
   const res_mahasiswa = await fetch(

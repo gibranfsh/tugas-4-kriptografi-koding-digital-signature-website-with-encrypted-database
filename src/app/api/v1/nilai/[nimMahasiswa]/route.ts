@@ -3,6 +3,7 @@ import { rc4ModifiedEncrypt } from "@/cipher/rc4Modified";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = 'default-no-store';
 
 export async function POST(
   req: NextRequest,

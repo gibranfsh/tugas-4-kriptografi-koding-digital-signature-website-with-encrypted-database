@@ -19,14 +19,14 @@ export default function NilaiForm({
   mahasiswa,
   mataKuliah,
 }: {
-  mahasiswa: Mahasiswa[];
-  mataKuliah: MataKuliah[];
+  mahasiswa: Mahasiswa[] | undefined;
+  mataKuliah: MataKuliah[] | undefined;
 }) {
   const [kodematkul, setKodematkul] = useState(
-    rc4ModifiedDecrypt(mataKuliah[0].kode_mata_kuliah, "bekasi")
+    mataKuliah ? rc4ModifiedDecrypt(mataKuliah[0]?.kode_mata_kuliah, "bekasi") : ""
   );
   const [nim, setNim] = useState(
-    rc4ModifiedDecrypt(mahasiswa[0].nim, "bekasi")
+    mahasiswa ? rc4ModifiedDecrypt(mahasiswa[0]?.nim, "bekasi") : ""
   );
   const [nilai, setNilai] = useState(Object.values(INDEKS)[0]);
 
@@ -66,7 +66,7 @@ export default function NilaiForm({
               className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setKodematkul(e.target.value)}
             >
-              {mataKuliah.map((matkul) => (
+              {mataKuliah?.map((matkul) => (
                 <option key={matkul.kode_mata_kuliah}>
                   {rc4ModifiedDecrypt(matkul.kode_mata_kuliah, "bekasi")}
                 </option>
@@ -80,7 +80,7 @@ export default function NilaiForm({
               className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setNim(e.target.value)}
             >
-              {mahasiswa.map((mhs) => (
+              {mahasiswa?.map((mhs) => (
                 <option key={mhs.nim}>
                   {rc4ModifiedDecrypt(mhs.nim, "bekasi")}
                 </option>

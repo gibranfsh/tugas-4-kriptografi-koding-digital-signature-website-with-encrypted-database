@@ -37,6 +37,7 @@ export default function Landing({ allMahasiswa }: { allMahasiswa: MahasiswaProps
             <tr>
               <th className="bg-orange-300 p-2">NIM</th>
               <th className="bg-orange-300 p-2">Nama</th>
+              
               <th className="bg-orange-300 p-2">Kode Matkul</th>
               <th className="bg-orange-300 p-2">Nama Matkul</th>
               <th className="bg-orange-300 p-2">Nilai</th>
