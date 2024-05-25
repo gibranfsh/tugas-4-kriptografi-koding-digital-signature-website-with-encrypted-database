@@ -1,4 +1,4 @@
-# Program Basis Data Terenkripsi dan Bertanda-tangan Digital dengan Menggunakan Algoritma RSA dan Fungsi hash SHA-3
+# Program Basis Data Terenkripsi dan Bertanda-tangan Digital dengan Menggunakan Algoritma RSA dan Fungsi hash SHA-3 ✨
 Pada tugas ini kami membuat aplikasi berbasis web untuk mengimplementasikan as basis data yang terenkripsi dan bertanda tangan digital menggunakan algoritma RSA dan fungsi SHA-3. Aplikasi yang dibuat dapat menerima input nilai mata kuliah untuk setiap mahasiswa, membangkitkan kunci publik dan kunci privat, menandatangani setiap rekaman nilai mahasiswa, mengenkripsi seluruh field pada basis data, memverifikasi rekaman nilai mahasiswa yang sudah ditandatangani, menampilkan basis data dalam bentuk plainteks dan cipherteks, membuat file transkrip nilai mahasiswa dalam bentuk PDF yang dienkripsi, dan menerima file transkrip nilai untuk di deskripsi.
 
 ## Tugas Kecil 4 - II4031 Kriptografi dan Koding
