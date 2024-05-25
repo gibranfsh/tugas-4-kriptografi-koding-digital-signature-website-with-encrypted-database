@@ -28,7 +28,7 @@ interface KeyPair {
   privateKey: { d: bigint; n: bigint };
 }
 
-function generate_key(bitsize: number): KeyPair {
+function generateKeyRSA(bitsize: number): KeyPair {
   let p = BigInt(random(bitsize));
   let q = BigInt(random(bitsize));
 
@@ -50,8 +50,6 @@ function generate_key(bitsize: number): KeyPair {
     privateKey: { d, n },
   };
 }
-
-
 
 function modPow(base: bigint, exp: bigint, mod: bigint): bigint {
   let result = BigInt(1);
@@ -101,10 +99,10 @@ function decryptRSA(cipher: string, e: bigint, n: bigint): string | Uint8Array {
     : Uint8Array.from(plain.split("").map((c) => c.charCodeAt(0)));
 }
 
-export { generate_key, encryptRSA, decryptRSA };
+export { generateKeyRSA, encryptRSA, decryptRSA };
 
 // // Example usage:
-// const key = generate_key(24);
+// const key = generateKeyRSA(24);
 
 // console.log(key.publicKey.e);
 // console.log(key.publicKey.n);

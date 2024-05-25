@@ -46,11 +46,11 @@ model MataKuliah {
     Nilai Nilai[]
 }
 
-model KetuaProgramStudi {
-    id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    nama        String
-    public_key  String
-    private_key String
+model KeyKetuaProgramStudi {
+    id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    public_key_e  String
+    private_key_d String
+    modulus_n     String
 
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt

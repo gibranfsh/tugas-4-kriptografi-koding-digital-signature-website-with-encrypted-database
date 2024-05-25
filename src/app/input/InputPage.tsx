@@ -10,8 +10,8 @@ export default function InputPage({
   mahasiswa,
   mataKuliah,
 }: {
-  mahasiswa: Mahasiswa[];
-  mataKuliah: MataKuliah[];
+  mahasiswa: Mahasiswa[] | undefined;
+  mataKuliah: MataKuliah[] | undefined;
 }) {
   const [type, setType] = useState("Mahasiswa");
   return (

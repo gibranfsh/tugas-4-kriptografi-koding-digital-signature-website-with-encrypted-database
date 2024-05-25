@@ -1,7 +1,6 @@
 "use client";
 
 import { rc4ModifiedEncrypt } from "@/cipher/rc4Modified";
-import { encryptRSA, generate_key } from "@/cipher/rsa";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -10,16 +9,8 @@ export default function MahasiswaForm() {
   const [nama, setNama] = useState("");
 
   const handleSubmit = async () => {
-    const tandatanganString = `${nim}${nama}`;
-    const key = generate_key(24);
-
     const nimencrypted = rc4ModifiedEncrypt(nim, "bekasi");
     const namaencrypted = rc4ModifiedEncrypt(nama, "bekasi");
-    const tandatanganencrypted = encryptRSA(
-      tandatanganString,
-      key.privateKey.d,
-      key.privateKey.n
-    );
 
     const res = await fetch(
       process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mahasiswa",
@@ -31,7 +22,6 @@ export default function MahasiswaForm() {
         body: JSON.stringify({
           nim: nimencrypted,
           nama: namaencrypted,
-          tanda_tangan: tandatanganencrypted,
         }),
       }
     );

@@ -2,6 +2,7 @@ import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = 'default-no-store';
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,6 +44,35 @@ export async function POST(req: NextRequest) {
     console.error("Error creating mahasiswa:", error);
     return NextResponse.json(
       { error: "Error creating mahasiswa" },
+      { status: 500 }
+    );
+  }
+}
+
+// update tanda_tangan
+export async function PATCH(req: NextRequest) {
+  const data = await req.json();
+
+  const { nim, tanda_tangan } = data;
+
+  try {
+    const mahasiswa = await prisma.mahasiswa.update({
+      where: {
+        nim,
+      },
+      data: {
+        tanda_tangan,
+      },
+    });
+
+    return NextResponse.json(
+      { message: "Mahasiswa updated successfully", mahasiswa },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating mahasiswa:", error);
+    return NextResponse.json(
+      { error: "Error updating mahasiswa" },
       { status: 500 }
     );
   }
