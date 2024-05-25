@@ -5,9 +5,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const mataKuliah = await prisma.mataKuliah.findMany();
+    const allMataKuliah = await prisma.mataKuliah.findMany();
     return NextResponse.json(
-      { message: "Mata kuliah retrieved successfully", mataKuliah },
+      { message: "All mata kuliah retrieved successfully", allMataKuliah },
       { status: 200 }
     );
   } catch (error) {

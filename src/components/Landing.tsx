@@ -1,7 +1,21 @@
 "use client";
+import { Mahasiswa } from "@prisma/client";
 import { AiOutlineSearch } from "react-icons/ai";
 
-export default function Landing() {
+interface MahasiswaProps extends Mahasiswa {
+  Nilai: {
+    nilai: string;
+    MataKuliah: {
+      kode_mata_kuliah: string;
+      nama_mata_kuliah: string;
+      sks: string;
+    };
+  }[];
+}
+
+export default function Landing({ allMahasiswa }: { allMahasiswa: MahasiswaProps[] }) {
+  console.log(allMahasiswa);
+  const handleDecrypt = (data: MahasiswaProps[]) => {};
   return (
     <div className="py-8 px-[5%]">
       <div className="flex gap-4 items-center justify-between">
