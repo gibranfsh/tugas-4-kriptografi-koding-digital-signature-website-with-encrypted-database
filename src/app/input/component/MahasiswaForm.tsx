@@ -8,20 +8,13 @@ import toast from "react-hot-toast";
 export default function MahasiswaForm() {
   const [nim, setNim] = useState("");
   const [nama, setNama] = useState("");
-  const [jumlahsks, setJumlahsks] = useState(0);
-  const [ipk, setIpk] = useState(0);
 
   const handleSubmit = async () => {
-    const tandatanganString = `${nim}${nama}${jumlahsks}${ipk}`;
+    const tandatanganString = `${nim}${nama}`;
     const key = generate_key(24);
 
     const nimencrypted = rc4ModifiedEncrypt(nim, "bekasi");
     const namaencrypted = rc4ModifiedEncrypt(nama, "bekasi");
-    const jumlahsksencrypted = rc4ModifiedEncrypt(
-      jumlahsks.toString(),
-      "bekasi"
-    );
-    const ipkencrypted = rc4ModifiedEncrypt(ipk.toString(), "bekasi");
     const tandatanganencrypted = encryptRSA(
       tandatanganString,
       key.privateKey.d,
@@ -36,14 +29,15 @@ export default function MahasiswaForm() {
       body: JSON.stringify({
         nim: nimencrypted,
         nama: namaencrypted,
-        jumlah_sks: jumlahsksencrypted,
-        ipk: ipkencrypted,
         tanda_tangan: tandatanganencrypted,
       }),
     });
 
     if (res.ok) {
       toast.success("Data mahasiswa berhasil disimpan");
+
+      setNim("");
+      setNama("");
     } else
       toast.error(
         "Data mahasiswa gagal disimpan, silahkan coba lagi atau hubungi admin"
@@ -71,28 +65,6 @@ export default function MahasiswaForm() {
               className="border border-gray-300 p-4 rounded-lg focus:outline-none"
               value={nama}
               onChange={(e) => setNama(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="w-1/2 flex flex-col gap-4">
-          <div className="flex flex-col gap-4">
-            <label className="font-semibold">IPK</label>
-            <input
-              type="number"
-              className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={ipk}
-              onChange={(e) => setIpk(e.target.valueAsNumber)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <label className="font-semibold">Jumlah SKS</label>
-            <input
-              type="number"
-              className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={jumlahsks}
-              onChange={(e) => setJumlahsks(e.target.valueAsNumber)}
             />
           </div>
         </div>

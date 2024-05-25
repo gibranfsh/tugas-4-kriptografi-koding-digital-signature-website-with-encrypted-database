@@ -22,6 +22,10 @@ export default function NilaiForm() {
 
     if (res.ok) {
       toast.success("Data nilai berhasil disimpan");
+      
+      setKodematkul("");
+      setNim("");
+      setNilai("");
     } else
       toast.error(
         "Data nilai gagal disimpan, silahkan coba lagi atau hubungi admin"

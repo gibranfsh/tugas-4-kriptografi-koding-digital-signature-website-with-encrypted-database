@@ -24,6 +24,10 @@ export default function MatkulForm() {
 
     if (res.ok) {
       toast.success("Data mata kuliah berhasil disimpan");
+      
+      setKodematkul("");
+      setNama("");
+      setSks(0);
     } else
       toast.error(
         "Data mata kuliah gagal disimpan, silahkan coba lagi atau hubungi admin"
