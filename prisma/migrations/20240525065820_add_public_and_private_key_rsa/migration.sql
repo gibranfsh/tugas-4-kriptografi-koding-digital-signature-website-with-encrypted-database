@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Mahasiswa" ADD COLUMN     "key_n" BIGINT NOT NULL DEFAULT 0,
+ADD COLUMN     "private_key_d" BIGINT NOT NULL DEFAULT 0,
+ADD COLUMN     "public_key_e" BIGINT NOT NULL DEFAULT 65537;

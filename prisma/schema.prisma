@@ -15,8 +15,12 @@ model Mahasiswa {
     ipk          String? @default("")
     tanda_tangan String  @default("")
 
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
+    public_key_e  BigInt @default(65537)
+    private_key_d BigInt @default(0)
+    key_n  BigInt @default(0)
+
+    created_at  DateTime @default(now())
+    updated_at  DateTime @updatedAt
 
     Nilai Nilai[]
 }
