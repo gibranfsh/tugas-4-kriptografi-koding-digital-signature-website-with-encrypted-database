@@ -1,7 +1,7 @@
 "use client";
 
 import { rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
-import { Mahasiswa, MataKuliah } from "@prisma/client";
+import { Mahasiswa, MataKuliah, INDEKS } from "@prisma/client";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -77,12 +77,14 @@ export default function NilaiForm({
 
           <div className="flex flex-col gap-4">
             <label className="font-semibold">Nilai</label>
-            <input
-              type="text"
-              className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={nilai}
+            <select
+              className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setNilai(e.target.value)}
-            />
+            >
+              {Object.values(INDEKS).map((indeks) => (
+                <option key={indeks}>{indeks}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
