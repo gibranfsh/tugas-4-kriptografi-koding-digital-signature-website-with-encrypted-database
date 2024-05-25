@@ -199,7 +199,11 @@ export default function Landing({
 
     signature = keccakHash(signature);
 
+    console.log("keccaked", signature)
+
     const digitalSignature = encryptRSA(signature, privateKey.d, privateKey.n);
+
+    console.log("digitalSignature", digitalSignature)
 
     const res = await fetch(
       process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mahasiswa",
