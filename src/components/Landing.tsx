@@ -46,6 +46,20 @@ export default function Landing({
   );
   const [mahasiswa, setMahasiswa] = useState<any>(allMahasiswa);
 
+  function insertLineBreaks(text: string, charLimit: number): JSX.Element {
+    const chunks = [];
+    for (let i = 0; i < text.length; i += charLimit) {
+      const chunk = text.substring(i, i + charLimit);
+      chunks.push(
+        <>
+          {chunk}
+          <br />
+        </>
+      );
+    }
+    return <>{chunks}</>;
+  }
+
   const handleToggle = (checked: boolean) => {
     const data = handleEncryptDecrypt(mahasiswa);
 
@@ -364,7 +378,7 @@ export default function Landing({
               </h1>
               <p className="">
                 {mahasiswa.tanda_tangan
-                  ? mahasiswa.tanda_tangan
+                  ? insertLineBreaks(mahasiswa.tanda_tangan, 120)
                   : "Belum ada tanda-tangan."}
               </p>
 
