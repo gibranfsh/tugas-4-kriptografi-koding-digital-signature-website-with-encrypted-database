@@ -52,6 +52,7 @@ npm install
 ```bash
 npm run dev
 ```
+## Untuk Isi dari File .env bisa Langsung Hubungi Kami Yaaa :D karena Sangat Rahasia
 
 ## Makalah dari Aplikasi
 
