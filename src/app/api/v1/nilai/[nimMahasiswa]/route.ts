@@ -105,8 +105,6 @@ export async function POST(
             rc4ModifiedDecrypt(nilai.nilai, "bekasi") as keyof typeof INDEKS
           ];
 
-        console.log({ sks, nilaiAngka })
-
         totalSks += sks;
         totalNilai += sks * nilaiAngka;
       });

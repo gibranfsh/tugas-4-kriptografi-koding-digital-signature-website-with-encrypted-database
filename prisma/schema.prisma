@@ -15,12 +15,8 @@ model Mahasiswa {
     ipk          String? @default("")
     tanda_tangan String  @default("")
 
-    public_key_e  BigInt @default(65537)
-    private_key_d BigInt @default(0)
-    key_n  BigInt @default(0)
-
-    created_at  DateTime @default(now())
-    updated_at  DateTime @updatedAt
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
 
     Nilai Nilai[]
 }
@@ -50,11 +46,11 @@ model MataKuliah {
     Nilai Nilai[]
 }
 
-model KetuaProgramStudi {
-    id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    nama        String
-    public_key  String
-    private_key String
+model KeyKetuaProgramStudi {
+    id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    public_key_e  String
+    private_key_d String
+    modulus_n     String
 
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt

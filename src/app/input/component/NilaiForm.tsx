@@ -66,8 +66,8 @@ export default function NilaiForm({
               className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setKodematkul(e.target.value)}
             >
-              {mataKuliah?.map((matkul) => (
-                <option key={matkul.kode_mata_kuliah}>
+              {mataKuliah?.map((matkul, index) => (
+                <option key={index}>
                   {rc4ModifiedDecrypt(matkul.kode_mata_kuliah, "bekasi")}
                 </option>
               ))}
@@ -80,8 +80,8 @@ export default function NilaiForm({
               className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setNim(e.target.value)}
             >
-              {mahasiswa?.map((mhs) => (
-                <option key={mhs.nim}>
+              {mahasiswa?.map((mhs, index) => (
+                <option key={index}>
                   {rc4ModifiedDecrypt(mhs.nim, "bekasi")}
                 </option>
               ))}
@@ -94,8 +94,8 @@ export default function NilaiForm({
               className="w-full border border-gray-300 p-4 rounded-lg focus:outline-none"
               onChange={(e) => setNilai(e.target.value as INDEKS)}
             >
-              {Object.values(INDEKS).map((nilai) => (
-                <option key={nilai}>{nilai}</option>
+              {Object.values(INDEKS).map((nilai, index) => (
+                <option key={index}>{nilai}</option>
               ))}
             </select>
           </div>

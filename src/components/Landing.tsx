@@ -1,11 +1,12 @@
 "use client";
-import { Mahasiswa } from "@prisma/client";
+import { KeyKetuaProgramStudi, Mahasiswa } from "@prisma/client";
 import { useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { rc4ModifiedEncrypt, rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
 import { decryptRSA, encryptRSA, generateKeyRSA } from "@/cipher/rsa";
 import { sign } from "crypto";
 import { keccakHash } from "@/cipher/sha3";
+import toast from "react-hot-toast";
 
 interface MahasiswaProps extends Mahasiswa {
   Nilai: {
@@ -20,15 +21,34 @@ interface MahasiswaProps extends Mahasiswa {
 
 export default function Landing({
   allMahasiswa,
+  newestKey,
 }: {
   allMahasiswa: MahasiswaProps[];
+  newestKey: KeyKetuaProgramStudi | null;
 }) {
   const [isEncrypted, setIsEncrypted] = useState(true);
   const [isEncryptedSignature, setIsEncryptedSignature] = useState(true);
-  const [isGenerate, setIsGenerate] = useState(false);
-  const [publicKey, setPublicKey] = useState<any>();
-  const [privateKey, setPrivateKey] = useState<any>();
+  const [isGenerate, setIsGenerate] = useState(newestKey ? true : false);
+  const [publicKey, setPublicKey] = useState<any>(
+    newestKey
+      ? {
+          e: BigInt(newestKey.public_key_e),
+          n: BigInt(newestKey.modulus_n),
+        }
+      : {}
+  );
+  const [privateKey, setPrivateKey] = useState<any>(
+    newestKey
+      ? {
+          d: BigInt(newestKey.private_key_d),
+          n: BigInt(newestKey.modulus_n),
+        }
+      : {}
+  );
   const [mahasiswa, setMahasiswa] = useState<any>(allMahasiswa);
+
+  console.log("newestKey", newestKey);
+  console.log({ publicKey, privateKey })
 
   const handleToggle = (checked: boolean) => {
     const decryptedData = handleEncryptDecrypt(allMahasiswa);
@@ -41,12 +61,33 @@ export default function Landing({
     }
   };
 
-  const handleGenerateKey = () => {
+  const handleGenerateKey = async () => {
     const RSAKeyPair = generateKeyRSA(24);
-    setIsGenerate(true);
     setPublicKey(RSAKeyPair.publicKey);
     setPrivateKey(RSAKeyPair.privateKey);
+    
     console.log("RSA Key Pair", RSAKeyPair);
+    
+    const res = await fetch(process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/kaprodi-key", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        public_key_e: RSAKeyPair.publicKey.e.toString(),
+        private_key_d: RSAKeyPair.privateKey.d.toString(),
+        modulus_n: RSAKeyPair.publicKey.n.toString(),
+      }),
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      toast.success("Key berhasil di-generate");
+      setIsGenerate(true);
+    } else {
+      toast.error(data.error ?? "Key gagal di-generate");
+    }
   };
 
   const handleEncryptDecrypt = (data: MahasiswaProps[]) => {
@@ -119,11 +160,12 @@ export default function Landing({
     }
   };
 
-  function handleSign(data: any) {
-    console.log("data", data);
+  async function handleSign(mahasiswa: MahasiswaProps) {
+    const nilai = mahasiswa.Nilai;
+    console.log("nilai", nilai);
     let signature = "";
 
-    data.map((nilai: any) => {
+    nilai.map((nilai: any) => {
       signature += rc4ModifiedDecrypt(
         nilai.MataKuliah.kode_mata_kuliah,
         "bekasi"
@@ -139,7 +181,31 @@ export default function Landing({
 
     signature = keccakHash(signature);
 
-    console.log(encryptRSA(signature, publicKey.e, publicKey.n));
+    const digitalSignature = encryptRSA(signature, publicKey.e, publicKey.n);
+
+    const res = await fetch(process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mahasiswa", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nim: mahasiswa.nim,
+        tanda_tangan: digitalSignature,
+      }),
+    });
+
+    console.log("mahasiswa", mahasiswa)
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.success("Tanda Tangan Digital berhasil disimpan");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } else {
+      toast.error(data.error ?? "Tanda Tangan Digital gagal disimpan");
+    }
   }
 
   return (
@@ -198,11 +264,8 @@ export default function Landing({
       </button>
 
       <div className="mt-6 flex flex-col gap-8">
-        {mahasiswa.map((mahasiswa: any) => (
-          <div
-            key={mahasiswa.nim}
-            className="border-2 rounded-lg border-gray-200 p-4"
-          >
+        {mahasiswa.map((mahasiswa: any, index: number) => (
+          <div key={index} className="border-2 rounded-lg border-gray-200 p-4">
             <h1 className="font-semibold text-xl mt-8">
               {mahasiswa.nim} - {mahasiswa.nama}
             </h1>
@@ -217,8 +280,8 @@ export default function Landing({
               </thead>
 
               <tbody>
-                {mahasiswa.Nilai.map((nilai: any) => (
-                  <tr key={mahasiswa.nim}>
+                {mahasiswa.Nilai.map((nilai: any, index: number) => (
+                  <tr key={index}>
                     <td className="border border-gray-300 p-2">
                       {nilai.MataKuliah.kode_mata_kuliah}
                     </td>
@@ -246,14 +309,14 @@ export default function Landing({
               <h1 className="font-semibold text-xl mt-8">
                 Tanda Tangan Digital
               </h1>
-              <p className="">{mahasiswa.tanda_tangan}</p>
+              <p className="">{mahasiswa.tanda_tangan ? mahasiswa.tanda_tangan : "Belum ada tanda-tangan."}</p>
 
               <div className="flex gap-4 mt-4">
                 <button
                   className={`${
                     isGenerate ? "bg-blue-500" : "bg-blue-300"
                   } p-2 w-32 text-white rounded-lg`}
-                  onClick={() => handleSign(mahasiswa.Nilai)}
+                  onClick={() => handleSign(mahasiswa)}
                   disabled={!isGenerate}
                 >
                   Sign
