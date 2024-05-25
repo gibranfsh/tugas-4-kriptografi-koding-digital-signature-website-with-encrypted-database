@@ -4,7 +4,6 @@ import { useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { rc4ModifiedEncrypt, rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
 import { decryptRSA, encryptRSA, generateKeyRSA } from "@/cipher/rsa";
-import { sign } from "crypto";
 import { keccakHash } from "@/cipher/sha3";
 import toast from "react-hot-toast";
 
@@ -47,41 +46,35 @@ export default function Landing({
   );
   const [mahasiswa, setMahasiswa] = useState<any>(allMahasiswa);
 
-  console.log("newestKey", newestKey);
-  console.log({ publicKey, privateKey })
-
   const handleToggle = (checked: boolean) => {
-    const decryptedData = handleEncryptDecrypt(allMahasiswa);
-    setIsEncrypted(checked);
+    const data = handleEncryptDecrypt(mahasiswa);
 
-    if (checked) {
-      console.log("Encrypted Data", decryptedData);
-    } else {
-      console.log("Decrypted Data", decryptedData);
-    }
+    setIsEncrypted(checked);
+    setMahasiswa(data);
   };
 
   const handleGenerateKey = async () => {
     const RSAKeyPair = generateKeyRSA(24);
     setPublicKey(RSAKeyPair.publicKey);
     setPrivateKey(RSAKeyPair.privateKey);
-    
-    console.log("RSA Key Pair", RSAKeyPair);
-    
-    const res = await fetch(process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/kaprodi-key", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        public_key_e: RSAKeyPair.publicKey.e.toString(),
-        private_key_d: RSAKeyPair.privateKey.d.toString(),
-        modulus_n: RSAKeyPair.publicKey.n.toString(),
-      }),
-    });
-    
+
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/kaprodi-key",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          public_key_e: RSAKeyPair.publicKey.e.toString(),
+          private_key_d: RSAKeyPair.privateKey.d.toString(),
+          modulus_n: RSAKeyPair.publicKey.n.toString(),
+        }),
+      }
+    );
+
     const data = await res.json();
-    
+
     if (res.ok) {
       toast.success("Key berhasil di-generate");
       setIsGenerate(true);
@@ -91,7 +84,16 @@ export default function Landing({
   };
 
   const handleEncryptDecrypt = (data: MahasiswaProps[]) => {
-    const RSAKeyPair = generateKeyRSA(24);
+    const RSAKeyPair = {
+      publicKey: {
+        e: publicKey.e,
+        n: publicKey.n,
+      },
+      privateKey: {
+        d: privateKey.d,
+        n: privateKey.n,
+      },
+    };
 
     if (isEncrypted) {
       const decryptedData = data.map((mahasiswa) => {
@@ -99,11 +101,7 @@ export default function Landing({
           ...mahasiswa,
           nim: rc4ModifiedDecrypt(mahasiswa.nim, "bekasi"),
           nama: rc4ModifiedDecrypt(mahasiswa.nama, "bekasi"),
-          tanda_tangan: decryptRSA(
-            mahasiswa.tanda_tangan,
-            RSAKeyPair.publicKey.e,
-            RSAKeyPair.publicKey.n
-          ),
+          tanda_tangan: rc4ModifiedDecrypt(mahasiswa.tanda_tangan, "bekasi"),
           jumlah_sks: rc4ModifiedDecrypt(mahasiswa.jumlah_sks ?? "0", "bekasi"),
           ipk: rc4ModifiedDecrypt(mahasiswa.ipk ?? "0", "bekasi"),
           Nilai: mahasiswa.Nilai.map((nilai) => {
@@ -162,7 +160,7 @@ export default function Landing({
 
   async function handleSign(mahasiswa: MahasiswaProps) {
     const nilai = mahasiswa.Nilai;
-    console.log("nilai", nilai);
+
     let signature = "";
 
     nilai.map((nilai: any) => {
@@ -177,24 +175,26 @@ export default function Landing({
       signature += rc4ModifiedDecrypt(nilai.MataKuliah.sks, "bekasi");
       signature += rc4ModifiedDecrypt(nilai.nilai, "bekasi");
     });
+
     signature = signature.replace(/ /g, "");
 
     signature = keccakHash(signature);
 
-    const digitalSignature = encryptRSA(signature, publicKey.e, publicKey.n);
+    const digitalSignature = encryptRSA(signature, privateKey.d, privateKey.n);
 
-    const res = await fetch(process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mahasiswa", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nim: mahasiswa.nim,
-        tanda_tangan: digitalSignature,
-      }),
-    });
-
-    console.log("mahasiswa", mahasiswa)
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_WEB_URL + "/api/v1/mahasiswa",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nim: mahasiswa.nim,
+          tanda_tangan: rc4ModifiedEncrypt(digitalSignature, "bekasi"),
+        }),
+      }
+    );
 
     const data = await res.json();
 
@@ -205,6 +205,59 @@ export default function Landing({
       }, 1500);
     } else {
       toast.error(data.error ?? "Tanda Tangan Digital gagal disimpan");
+    }
+  }
+
+  async function handleVerify(mahasiswa: MahasiswaProps) {
+    const nilai = mahasiswa.Nilai;
+
+    let messageDigest1 = "";
+
+    nilai.map((nilai: any) => {
+      messageDigest1 += rc4ModifiedDecrypt(
+        nilai.MataKuliah.kode_mata_kuliah,
+        "bekasi"
+      );
+      messageDigest1 += rc4ModifiedDecrypt(
+        nilai.MataKuliah.nama_mata_kuliah,
+        "bekasi"
+      );
+      messageDigest1 += rc4ModifiedDecrypt(nilai.MataKuliah.sks, "bekasi");
+      messageDigest1 += rc4ModifiedDecrypt(nilai.nilai, "bekasi");
+    });
+
+    messageDigest1 = messageDigest1.replace(/ /g, "");
+
+    messageDigest1 = keccakHash(messageDigest1);
+
+    const decryptedSignature = rc4ModifiedDecrypt(
+      mahasiswa.tanda_tangan,
+      "bekasi"
+    );
+
+    const messageDigest2 = decryptRSA(
+      decryptedSignature as string,
+      publicKey.e,
+      publicKey.n
+    );
+
+    // console.log("publicKey.e", publicKey.e);
+    // console.log("publicKey.n", publicKey.n);
+    // console.log("mahasiswa.tanda_tangan", mahasiswa.tanda_tangan);
+    // console.log("decryptedSignature", decryptedSignature);
+
+    // console.log("messageDigest1", messageDigest1);
+    // console.log("messageDigest2", messageDigest2);
+    // console.log("isEqual", messageDigest1 === messageDigest2);
+
+    if (messageDigest1 === messageDigest2) {
+      toast.success("Tanda Tangan Digital Valid", {
+        duration: 3000,
+      });
+    } else {
+      toast.error("Tanda Tangan Digital Tidak Valid", {
+        duration: 3000,
+      });
     }
   }
 
@@ -309,29 +362,36 @@ export default function Landing({
               <h1 className="font-semibold text-xl mt-8">
                 Tanda Tangan Digital
               </h1>
-              <p className="">{mahasiswa.tanda_tangan ? mahasiswa.tanda_tangan : "Belum ada tanda-tangan."}</p>
+              <p className="">
+                {mahasiswa.tanda_tangan
+                  ? mahasiswa.tanda_tangan
+                  : "Belum ada tanda-tangan."}
+              </p>
 
               <div className="flex gap-4 mt-4">
                 <button
+                  disabled={!isGenerate || !isEncrypted}
                   className={`${
-                    isGenerate ? "bg-blue-500" : "bg-blue-300"
+                    isGenerate && isEncrypted ? "bg-blue-500" : "bg-blue-300"
                   } p-2 w-32 text-white rounded-lg`}
                   onClick={() => handleSign(mahasiswa)}
-                  disabled={!isGenerate}
                 >
                   Sign
                 </button>
                 <button
-                  disabled={!isGenerate}
+                  disabled={!isGenerate || !isEncrypted}
                   className={`${
-                    isGenerate ? "bg-blue-500" : "bg-blue-300"
+                    isGenerate && isEncrypted ? "bg-blue-500" : "bg-blue-300"
                   } p-2 w-32 text-white rounded-lg`}
+                  onClick={() => handleVerify(mahasiswa)}
                 >
                   Verify
                 </button>
                 <button
-                  disabled={!isGenerate}
-                  className="bg-blue-500 p-2 w-32 text-white rounded-lg"
+                  disabled={!isGenerate || !isEncrypted}
+                  className={`${
+                    isGenerate && isEncrypted ? "bg-blue-500" : "bg-blue-300"
+                  } p-2 w-32 text-white rounded-lg`}
                 >
                   Download
                 </button>
