@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Mahasiswa" ALTER COLUMN "jumlah_sks" DROP NOT NULL,
+ALTER COLUMN "jumlah_sks" SET DEFAULT '',
+ALTER COLUMN "ipk" DROP NOT NULL,
+ALTER COLUMN "ipk" SET DEFAULT '';
