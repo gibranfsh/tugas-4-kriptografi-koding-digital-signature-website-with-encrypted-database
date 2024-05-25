@@ -3,7 +3,9 @@ import { Mahasiswa } from "@prisma/client";
 import { useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { rc4ModifiedEncrypt, rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
-import { decryptRSA, generateKeyRSA } from "@/cipher/rsa";
+import { decryptRSA, encryptRSA, generateKeyRSA } from "@/cipher/rsa";
+import { sign } from "crypto";
+import { keccakHash } from "@/cipher/sha3";
 
 interface MahasiswaProps extends Mahasiswa {
   Nilai: {
@@ -23,33 +25,28 @@ export default function Landing({
 }) {
   const [isEncrypted, setIsEncrypted] = useState(true);
   const [isEncryptedSignature, setIsEncryptedSignature] = useState(true);
-
-  // function insertLineBreaks(text: string, charLimit: number): JSX.Element {
-  //   const chunks = [];
-  //   for (let i = 0; i < text.length; i += charLimit) {
-  //     const chunk = text.substring(i, i + charLimit);
-  //     chunks.push(
-  //       <>
-  //         {chunk}
-  //         <br />
-  //       </>
-  //     );
-  //   }
-  //   return <>{chunks}</>;
-  // }
-
+  const [isGenerate, setIsGenerate] = useState(false);
+  const [publicKey, setPublicKey] = useState<any>();
+  const [privateKey, setPrivateKey] = useState<any>();
   const [mahasiswa, setMahasiswa] = useState<any>(allMahasiswa);
 
   const handleToggle = (checked: boolean) => {
-    setIsEncrypted(checked);
-
     const decryptedData = handleEncryptDecrypt(allMahasiswa);
+    setIsEncrypted(checked);
 
     if (checked) {
       console.log("Encrypted Data", decryptedData);
     } else {
       console.log("Decrypted Data", decryptedData);
     }
+  };
+
+  const handleGenerateKey = () => {
+    const RSAKeyPair = generateKeyRSA(24);
+    setIsGenerate(true);
+    setPublicKey(RSAKeyPair.publicKey);
+    setPrivateKey(RSAKeyPair.privateKey);
+    console.log("RSA Key Pair", RSAKeyPair);
   };
 
   const handleEncryptDecrypt = (data: MahasiswaProps[]) => {
@@ -122,6 +119,29 @@ export default function Landing({
     }
   };
 
+  function handleSign(data: any) {
+    console.log("data", data);
+    let signature = "";
+
+    data.map((nilai: any) => {
+      signature += rc4ModifiedDecrypt(
+        nilai.MataKuliah.kode_mata_kuliah,
+        "bekasi"
+      );
+      signature += rc4ModifiedDecrypt(
+        nilai.MataKuliah.nama_mata_kuliah,
+        "bekasi"
+      );
+      signature += rc4ModifiedDecrypt(nilai.MataKuliah.sks, "bekasi");
+      signature += rc4ModifiedDecrypt(nilai.nilai, "bekasi");
+    });
+    signature = signature.replace(/ /g, "");
+
+    signature = keccakHash(signature);
+
+    console.log(encryptRSA(signature, publicKey.e, publicKey.n));
+  }
+
   return (
     <div className="py-8 px-[5%]">
       <div className="flex gap-4 items-center justify-between">
@@ -170,9 +190,19 @@ export default function Landing({
         </div>
       </div>
 
+      <button
+        onClick={handleGenerateKey}
+        className="bg-blue-500 p-2 w-32 text-white rounded-lg"
+      >
+        Generate Key
+      </button>
+
       <div className="mt-6 flex flex-col gap-8">
         {mahasiswa.map((mahasiswa: any) => (
-          <div key={mahasiswa.nim} className="border-2 rounded-lg border-gray-200 p-4">
+          <div
+            key={mahasiswa.nim}
+            className="border-2 rounded-lg border-gray-200 p-4"
+          >
             <h1 className="font-semibold text-xl mt-8">
               {mahasiswa.nim} - {mahasiswa.nama}
             </h1>
@@ -205,19 +235,41 @@ export default function Landing({
                 ))}
               </tbody>
             </table>
+
+            <div>
+              <h1 className="font-semibold text-xl mt-8">IPK dan Jumlah SKS</h1>
+              <p className="">IPK: {mahasiswa.ipk}</p>
+              <p className="">Jumlah SKS: {mahasiswa.jumlah_sks}</p>
+            </div>
+
             <div className="mt-6">
               <h1 className="font-semibold text-xl mt-8">
                 Tanda Tangan Digital
               </h1>
-              <p className="">
-                {(mahasiswa.tanda_tangan, 100)}
-              </p>
+              <p className="">{mahasiswa.tanda_tangan}</p>
 
               <div className="flex gap-4 mt-4">
-                <button className="bg-blue-500 p-2 w-32 text-white rounded-lg">
+                <button
+                  className={`${
+                    isGenerate ? "bg-blue-500" : "bg-blue-300"
+                  } p-2 w-32 text-white rounded-lg`}
+                  onClick={() => handleSign(mahasiswa.Nilai)}
+                  disabled={!isGenerate}
+                >
+                  Sign
+                </button>
+                <button
+                  disabled={!isGenerate}
+                  className={`${
+                    isGenerate ? "bg-blue-500" : "bg-blue-300"
+                  } p-2 w-32 text-white rounded-lg`}
+                >
                   Verify
                 </button>
-                <button className="bg-blue-500 p-2 w-32 text-white rounded-lg">
+                <button
+                  disabled={!isGenerate}
+                  className="bg-blue-500 p-2 w-32 text-white rounded-lg"
+                >
                   Download
                 </button>
               </div>
