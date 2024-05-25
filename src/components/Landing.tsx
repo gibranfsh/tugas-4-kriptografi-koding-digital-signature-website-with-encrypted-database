@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { generateTranscript } from "@/app/utils/generateTranscript";
 import { encrypt } from "js-crypto-aes";
 import { encryptMessage, generateIV } from "@/cipher/aes";
+import { useRouter } from "next/navigation";
 
 interface MahasiswaProps extends Mahasiswa {
   Nilai: {
@@ -48,6 +49,7 @@ export default function Landing({
       : {}
   );
   const [mahasiswa, setMahasiswa] = useState<any>(allMahasiswa);
+  const router = useRouter();
 
   function insertLineBreaks(text: string, charLimit: number): JSX.Element {
     const chunks = [];
@@ -95,6 +97,9 @@ export default function Landing({
     if (res.ok) {
       toast.success("Key berhasil di-generate");
       setIsGenerate(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } else {
       toast.error(data.error ?? "Key gagal di-generate");
     }
@@ -364,22 +369,6 @@ export default function Landing({
             <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             <span className="ms-3 text-sm font-medium text-gray-900">
               Encrypt Data
-            </span>
-          </label>
-
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              value=""
-              className="sr-only peer focus:outline-none"
-              onChange={(e) => {
-                setIsEncryptedSignature(e.target.checked);
-              }}
-              checked={isEncryptedSignature}
-            />
-            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-              Encrypt Tanda Tangan
             </span>
           </label>
 
