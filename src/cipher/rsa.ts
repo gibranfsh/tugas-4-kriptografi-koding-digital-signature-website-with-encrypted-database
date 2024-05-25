@@ -1,5 +1,4 @@
 import random from "crypto-random-prime";
-import fs from "fs";
 
 function gcd(a: bigint, b: bigint): bigint {
   while (b !== BigInt(0)) {
@@ -52,6 +51,8 @@ function generate_key(bitsize: number): KeyPair {
   };
 }
 
+
+
 function modPow(base: bigint, exp: bigint, mod: bigint): bigint {
   let result = BigInt(1);
   base %= mod;
@@ -100,19 +101,7 @@ function decryptRSA(cipher: string, e: bigint, n: bigint): string | Uint8Array {
     : Uint8Array.from(plain.split("").map((c) => c.charCodeAt(0)));
 }
 
-async function readFileAsUint8Array(filePath: string): Promise<Uint8Array> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(new Uint8Array(data));
-      }
-    });
-  });
-}
-
-export { generate_key, encryptRSA, decryptRSA, readFileAsUint8Array };
+export { generate_key, encryptRSA, decryptRSA };
 
 // // Example usage:
 // const key = generate_key(24);
