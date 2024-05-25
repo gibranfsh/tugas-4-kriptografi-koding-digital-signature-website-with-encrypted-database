@@ -24,6 +24,22 @@ export default function Landing({
   const [isEncrypted, setIsEncrypted] = useState(true);
   const [isEncryptedSignature, setIsEncryptedSignature] = useState(true);
 
+  // function insertLineBreaks(text: string, charLimit: number): JSX.Element {
+  //   const chunks = [];
+  //   for (let i = 0; i < text.length; i += charLimit) {
+  //     const chunk = text.substring(i, i + charLimit);
+  //     chunks.push(
+  //       <>
+  //         {chunk}
+  //         <br />
+  //       </>
+  //     );
+  //   }
+  //   return <>{chunks}</>;
+  // }
+
+  const [mahasiswa, setMahasiswa] = useState<any>(allMahasiswa);
+
   const handleToggle = (checked: boolean) => {
     setIsEncrypted(checked);
 
@@ -37,67 +53,73 @@ export default function Landing({
   };
 
   const handleEncryptDecrypt = (data: MahasiswaProps[]) => {
-    // if (isEncrypted) {
-    //   const decryptedData = data.map((mahasiswa) => {
-    //     return {
-    //       ...mahasiswa,
-    //       nim: rc4ModifiedDecrypt(mahasiswa.nim, "bekasi"),
-    //       nama: rc4ModifiedDecrypt(mahasiswa.nama, "bekasi"),
-    //       tanda_tangan: decryptRSA(mahasiswa.tanda_tangan, RSAKeyPair.publicKey.e, RSAKeyPair.publicKey.n),
-    //       jumlah_sks: rc4ModifiedDecrypt(mahasiswa.jumlah_sks ?? "0", "bekasi"),
-    //       ipk: rc4ModifiedDecrypt(mahasiswa.ipk ?? "0", "bekasi"),
-    //       Nilai: mahasiswa.Nilai.map((nilai) => {
-    //         return {
-    //           ...nilai,
-    //           MataKuliah: {
-    //             ...nilai.MataKuliah,
-    //             kode_mata_kuliah: rc4ModifiedDecrypt(
-    //               nilai.MataKuliah.kode_mata_kuliah,
-    //               "bekasi"
-    //             ),
-    //             nama_mata_kuliah: rc4ModifiedDecrypt(
-    //               nilai.MataKuliah.nama_mata_kuliah,
-    //               "bekasi"
-    //             ),
-    //             sks: rc4ModifiedDecrypt(nilai.MataKuliah.sks, "bekasi"),
-    //           },
-    //           nilai: rc4ModifiedDecrypt(nilai.nilai, "bekasi"),
-    //         };
-    //       }),
-    //     };
-    //   });
+    const RSAKeyPair = generateKeyRSA(24);
 
-    //   return decryptedData;
-    // } else {
-    //   const encryptedData = data.map((mahasiswa) => {
-    //     return {
-    //       ...mahasiswa,
-    //       nim: rc4ModifiedEncrypt(mahasiswa.nim, "bekasi"),
-    //       nama: rc4ModifiedEncrypt(mahasiswa.nama, "bekasi"),
-    //       tanda_tangan: rc4ModifiedEncrypt(mahasiswa.tanda_tangan, "bekasi"),
-    //       Nilai: mahasiswa.Nilai.map((nilai) => {
-    //         return {
-    //           ...nilai,
-    //           MataKuliah: {
-    //             ...nilai.MataKuliah,
-    //             kode_mata_kuliah: rc4ModifiedEncrypt(
-    //               nilai.MataKuliah.kode_mata_kuliah,
-    //               "bekasi"
-    //             ),
-    //             nama_mata_kuliah: rc4ModifiedEncrypt(
-    //               nilai.MataKuliah.nama_mata_kuliah,
-    //               "bekasi"
-    //             ),
-    //             sks: rc4ModifiedEncrypt(nilai.MataKuliah.sks, "bekasi"),
-    //           },
-    //           nilai: rc4ModifiedEncrypt(nilai.nilai, "bekasi"),
-    //         };
-    //       }),
-    //     };
-    //   });
-
-    //   return encryptedData;
-    // }
+    if (isEncrypted) {
+      const decryptedData = data.map((mahasiswa) => {
+        return {
+          ...mahasiswa,
+          nim: rc4ModifiedDecrypt(mahasiswa.nim, "bekasi"),
+          nama: rc4ModifiedDecrypt(mahasiswa.nama, "bekasi"),
+          tanda_tangan: decryptRSA(
+            mahasiswa.tanda_tangan,
+            RSAKeyPair.publicKey.e,
+            RSAKeyPair.publicKey.n
+          ),
+          jumlah_sks: rc4ModifiedDecrypt(mahasiswa.jumlah_sks ?? "0", "bekasi"),
+          ipk: rc4ModifiedDecrypt(mahasiswa.ipk ?? "0", "bekasi"),
+          Nilai: mahasiswa.Nilai.map((nilai) => {
+            return {
+              ...nilai,
+              MataKuliah: {
+                ...nilai.MataKuliah,
+                kode_mata_kuliah: rc4ModifiedDecrypt(
+                  nilai.MataKuliah.kode_mata_kuliah,
+                  "bekasi"
+                ),
+                nama_mata_kuliah: rc4ModifiedDecrypt(
+                  nilai.MataKuliah.nama_mata_kuliah,
+                  "bekasi"
+                ),
+                sks: rc4ModifiedDecrypt(nilai.MataKuliah.sks, "bekasi"),
+              },
+              nilai: rc4ModifiedDecrypt(nilai.nilai, "bekasi"),
+            };
+          }),
+        };
+      });
+      setMahasiswa(decryptedData);
+      return decryptedData;
+    } else {
+      const encryptedData = data.map((mahasiswa) => {
+        return {
+          ...mahasiswa,
+          nim: rc4ModifiedEncrypt(mahasiswa.nim, "bekasi"),
+          nama: rc4ModifiedEncrypt(mahasiswa.nama, "bekasi"),
+          tanda_tangan: rc4ModifiedEncrypt(mahasiswa.tanda_tangan, "bekasi"),
+          Nilai: mahasiswa.Nilai.map((nilai) => {
+            return {
+              ...nilai,
+              MataKuliah: {
+                ...nilai.MataKuliah,
+                kode_mata_kuliah: rc4ModifiedEncrypt(
+                  nilai.MataKuliah.kode_mata_kuliah,
+                  "bekasi"
+                ),
+                nama_mata_kuliah: rc4ModifiedEncrypt(
+                  nilai.MataKuliah.nama_mata_kuliah,
+                  "bekasi"
+                ),
+                sks: rc4ModifiedEncrypt(nilai.MataKuliah.sks, "bekasi"),
+              },
+              nilai: rc4ModifiedEncrypt(nilai.nilai, "bekasi"),
+            };
+          }),
+        };
+      });
+      setMahasiswa(encryptedData);
+      return encryptedData;
+    }
   };
 
   return (
@@ -148,103 +170,60 @@ export default function Landing({
         </div>
       </div>
 
-      <div>
-        <table className="w-full mt-8">
-          <thead>
-            <tr>
-              <th className="bg-orange-300 p-2">NIM</th>
-              <th className="bg-orange-300 p-2">Nama</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 1</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 2</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 3</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 4</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 5</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 6</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 7</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 8</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 9</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Kode Matkul 10</th>
-              <th className="bg-orange-300 p-2">Nama Matkul</th>
-              <th className="bg-orange-300 p-2">Nilai</th>
-              <th className="bg-orange-300 p-2">SKS</th>
-              <th className="bg-orange-300 p-2">Jumlah SKS</th>
-              <th className="bg-orange-300 p-2">IPK</th>
-              <th className="bg-orange-300 p-2">Tanda-tangan Digital</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allMahasiswa.map((mahasiswa) => (
-              <tr key={mahasiswa.nim}>
-                <td className="border border-gray-300 p-2">
-                  {isEncrypted ? mahasiswa.nim : mahasiswa.nim}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {isEncrypted ? mahasiswa.nama : mahasiswa.nama}
-                </td>
-                {mahasiswa.Nilai.map((nilai) => (
-                  <>
+      <div className="mt-6 flex flex-col gap-8">
+        {mahasiswa.map((mahasiswa: any) => (
+          <div key={mahasiswa.nim} className="border-2 rounded-lg border-gray-200 p-4">
+            <h1 className="font-semibold text-xl mt-8">
+              {mahasiswa.nim} - {mahasiswa.nama}
+            </h1>
+            <table className="w-full mt-8">
+              <thead>
+                <tr>
+                  <th className="bg-orange-300 p-2">Kode Matkul</th>
+                  <th className="bg-orange-300 p-2">Nama Matkul</th>
+                  <th className="bg-orange-300 p-2">Nilai</th>
+                  <th className="bg-orange-300 p-2">SKS</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {mahasiswa.Nilai.map((nilai: any) => (
+                  <tr key={mahasiswa.nim}>
                     <td className="border border-gray-300 p-2">
-                      {isEncrypted
-                        ? nilai.MataKuliah.kode_mata_kuliah
-                        : nilai.MataKuliah.kode_mata_kuliah}
+                      {nilai.MataKuliah.kode_mata_kuliah}
                     </td>
                     <td className="border border-gray-300 p-2">
-                      {isEncrypted
-                        ? nilai.MataKuliah.nama_mata_kuliah
-                        : nilai.MataKuliah.nama_mata_kuliah}
+                      {nilai.MataKuliah.nama_mata_kuliah}
                     </td>
                     <td className="border border-gray-300 p-2">
-                      {isEncrypted ? nilai.nilai : nilai.nilai}
+                      {nilai.nilai}
                     </td>
                     <td className="border border-gray-300 p-2">
-                      {isEncrypted
-                        ? nilai.MataKuliah.sks
-                        : nilai.MataKuliah.sks}
+                      {nilai.MataKuliah.sks}
                     </td>
-                  </>
+                  </tr>
                 ))}
-                <td className="border border-gray-300 p-2">
-                  {isEncrypted ? mahasiswa.jumlah_sks : mahasiswa.jumlah_sks}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {isEncrypted ? mahasiswa.ipk : mahasiswa.ipk}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {isEncryptedSignature
-                    ? mahasiswa.tanda_tangan
-                    : mahasiswa.tanda_tangan}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+            <div className="mt-6">
+              <h1 className="font-semibold text-xl mt-8">
+                Tanda Tangan Digital
+              </h1>
+              <p className="">
+                {(mahasiswa.tanda_tangan, 100)}
+              </p>
+
+              <div className="flex gap-4 mt-4">
+                <button className="bg-blue-500 p-2 w-32 text-white rounded-lg">
+                  Verify
+                </button>
+                <button className="bg-blue-500 p-2 w-32 text-white rounded-lg">
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
