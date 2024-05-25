@@ -1,18 +1,33 @@
 "use client";
 
+import { rc4ModifiedEncrypt } from "@/cipher/rc4Modified";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function MatkulForm() {
   const [kodematkul, setKodematkul] = useState("");
   const [nama, setNama] = useState("");
   const [sks, setSks] = useState(0);
 
-  const handleSubmit = () => {
-    console.log({
-      kodematkul,
-      nama,
-      sks,
+  const handleSubmit = async () => {
+    const res = await fetch("/api/v1/mata-kuliah", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        kode_mata_kuliah: rc4ModifiedEncrypt(kodematkul, "bekasi"),
+        nama_mata_kuliah: rc4ModifiedEncrypt(nama, "bekasi"),
+        sks: rc4ModifiedEncrypt(sks.toString(), "bekasi"),
+      }),
     });
+
+    if (res.ok) {
+      toast.success("Data mata kuliah berhasil disimpan");
+    } else
+      toast.error(
+        "Data mata kuliah gagal disimpan, silahkan coba lagi atau hubungi admin"
+      );
   };
 
   return (
@@ -34,7 +49,7 @@ export default function MatkulForm() {
             <input
               type="text"
               className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={kodematkul}
+              value={nama}
               onChange={(e) => setNama(e.target.value)}
             />
           </div>
@@ -44,7 +59,7 @@ export default function MatkulForm() {
             <input
               type="number"
               className="border border-gray-300 p-4 rounded-lg focus:outline-none"
-              value={kodematkul}
+              value={sks}
               onChange={(e) => setSks(e.target.valueAsNumber)}
             />
           </div>
