@@ -10,6 +10,9 @@ export default function Navbar() {
         <li>
           <a href="/input">Input</a>
         </li>
+        <li>
+          <a href="/file">File</a>
+        </li>
       </ul>
     </nav>
   );
