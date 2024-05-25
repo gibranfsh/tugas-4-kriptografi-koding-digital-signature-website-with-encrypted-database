@@ -6,6 +6,7 @@ import { rc4ModifiedEncrypt, rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
 import { decryptRSA, encryptRSA, generateKeyRSA } from "@/cipher/rsa";
 import { keccakHash } from "@/cipher/sha3";
 import toast from "react-hot-toast";
+import { generateTranscript } from "@/app/utils/generateTranscript";
 
 interface MahasiswaProps extends Mahasiswa {
   Nilai: {
@@ -261,6 +262,57 @@ export default function Landing({
     }
   }
 
+  const handleDownload = async (mahasiswa: MahasiswaProps) => {
+    const loadingToast = toast.loading("Submitting data...");
+
+    const nilaiMahasiswaDecrypted = mahasiswa.Nilai.map((nilai) => {
+      return {
+        ...nilai,
+        MataKuliah: {
+          ...nilai.MataKuliah,
+          kode_mata_kuliah: rc4ModifiedDecrypt(
+            nilai.MataKuliah.kode_mata_kuliah,
+            "bekasi"
+          ),
+          nama_mata_kuliah: rc4ModifiedDecrypt(
+            nilai.MataKuliah.nama_mata_kuliah,
+            "bekasi"
+          ),
+          sks: rc4ModifiedDecrypt(nilai.MataKuliah.sks, "bekasi"),
+        },
+        nilai: rc4ModifiedDecrypt(nilai.nilai, "bekasi"),
+      };
+    }
+    );
+
+    const mahasiswaDecrypted = {
+      nim: rc4ModifiedDecrypt(mahasiswa.nim, "bekasi"),
+      nama: rc4ModifiedDecrypt(mahasiswa.nama, "bekasi"),
+      tanda_tangan: rc4ModifiedDecrypt(mahasiswa.tanda_tangan, "bekasi"),
+      jumlah_sks: rc4ModifiedDecrypt(mahasiswa.jumlah_sks ?? "0", "bekasi"),
+      ipk: rc4ModifiedDecrypt(mahasiswa.ipk ?? "0", "bekasi"),
+      Nilai: nilaiMahasiswaDecrypted,
+    };
+
+    console.log("mahasiswaDecrypted", mahasiswaDecrypted);
+    try {
+      const pdfBytes = await generateTranscript(mahasiswaDecrypted, "I Gusti Bagus Baskara Nugraha, S.T., M.T., Ph.D.");
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${mahasiswaDecrypted.nim}_transcript.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("Transcript downloaded successfully", { id: loadingToast });
+    } catch (error) {
+      toast.error("Failed to download transcript", { id: loadingToast });
+      console.error("Download error:", error);
+    }
+  };
+
   return (
     <div className="py-8 px-[5%]">
       <div className="flex gap-4 items-center justify-between">
@@ -392,6 +444,7 @@ export default function Landing({
                   className={`${
                     isGenerate && isEncrypted ? "bg-blue-500" : "bg-blue-300"
                   } p-2 w-32 text-white rounded-lg`}
+                  onClick={() => handleDownload(mahasiswa)}
                 >
                   Download
                 </button>
