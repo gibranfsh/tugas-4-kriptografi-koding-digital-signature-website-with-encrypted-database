@@ -11,7 +11,6 @@ export async function POST(
   const data = await req.json();
 
   const { nimMahasiswa } = params;
-  console.log("nimMahasiswa:", nimMahasiswa)
 
   const mahasiswa = await prisma.mahasiswa.findUnique({
     where: {
@@ -38,6 +37,20 @@ export async function POST(
   }
 
   try {
+    const existingNilai = await prisma.nilai.findFirst({
+      where: {
+        nim: rc4ModifiedEncrypt(nimMahasiswa, "bekasi") as string,
+        kode_mata_kuliah: rc4ModifiedEncrypt(kode_mata_kuliah, "bekasi") as string,
+      },
+    });
+
+    if (existingNilai) {
+      return NextResponse.json(
+        { error: `Nilai untuk matkul ${kode_mata_kuliah} untuk NIM ${nimMahasiswa} sudah ada` },
+        { status: 400 }
+      );
+    }
+    
     const newNilai = await prisma.nilai.create({
       data: {
         nilai: rc4ModifiedEncrypt(nilai, "bekasi") as string,

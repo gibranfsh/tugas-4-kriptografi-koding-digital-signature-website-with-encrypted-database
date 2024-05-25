@@ -8,16 +8,6 @@ generator client {
     provider = "prisma-client-js"
 }
 
-enum INDEKS {
-    A
-    AB
-    B
-    BC
-    C
-    D
-    E
-}
-
 model Mahasiswa {
     nim          String  @id @unique
     nama         String

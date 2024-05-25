@@ -1,9 +1,19 @@
 "use client";
 
 import { rc4ModifiedDecrypt } from "@/cipher/rc4Modified";
-import { Mahasiswa, MataKuliah, INDEKS } from "@prisma/client";
+import { Mahasiswa, MataKuliah } from "@prisma/client";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
+enum INDEKS {
+  "A",
+  "AB",
+  "B",
+  "BC",
+  "C",
+  "D",
+  "E",
+}
 
 export default function NilaiForm({
   mahasiswa,
@@ -35,15 +45,13 @@ export default function NilaiForm({
       }
     );
 
+    const data = await res.json();
+
     if (res.ok) {
       toast.success("Data nilai berhasil disimpan");
-
-      setKodematkul("");
-      setNim("");
-      setNilai("");
     } else
       toast.error(
-        "Data nilai gagal disimpan, silahkan coba lagi atau hubungi admin"
+        data.error ?? "Data nilai gagal disimpan, silahkan coba lagi atau hubungi admin"
       );
   };
 
